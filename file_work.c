@@ -1,18 +1,17 @@
 #include <stdio.h>
-#define N 10
 
-void maximum (double B[0], double *min, double *max) {         // Функция для нахождения максимума и минимума
+void maximum(double* b, double* min, double* max, int size_b) {         // Функция для нахождения максимума и минимума
     double m = 0.0;
-    double n = 99999999.0;
-    for (int i = 0; i < N; i++) {
-        if (B[i] > 0.0) {
-            if (B[i] > m) {
-                m = B[i];
+    double n = sizeof(double);
+    for (int i = 0; i < size_b; i++) {
+        if (b[i] > 0.0) {
+            if (b[i] > m) {
+                m = b[i];
             }
         }
         else {
-            if (B[i] < n) {
-                n = B[i];
+            if (b[i] < n) {
+                n = b[i];
             }
         }
     }
@@ -20,43 +19,53 @@ void maximum (double B[0], double *min, double *max) {         // Функция
     *max = m;
 }
 
+int search(double* b, FILE* f, int size_b) {
+    int tmp;
+    int a;
+    for (int i = 0; i < size_b; i++) {
+        a = fscanf(f, "%lf", &b[i]);
+        if (a < 0) {
+            tmp = i;  // сохраняем номер первого "пустого" элемента в переменную tmp
+            return tmp;
+        }
+    }
+}
+
+void reading(double* b, int tmp, FILE* f, int size_b) {
+    int i_tmp = 0;
+    for (int i = 0; i < size_b; i++) {
+        if (i_tmp == tmp) {
+            fseek(f, 0, SEEK_SET); // Сдвигаем указатель в начало файла каждые tmp итераций
+            i_tmp = 0;              // Обнуляем счетчик
+        }
+        fscanf(f, "%lf", &b[i]);
+        i_tmp++;
+    }
+}
+
+void writing(FILE* f, double* b, double max, double min, int size_b) {
+    for (int i = 0; i < size_b; i++) {
+        fprintf(f, "%lf ", b[i]);
+    }
+    fprintf(f, "\n Maximum: %lf", max);
+    fprintf(f, "\n Minimum: %lf", min);
+}
+
 void main (void) {
     double min;
     double max;
     FILE *f;
-    double B[N];                  // Массив,  в который происходит запись из файла
-    int i_tmp = 0;
+    int size_b = 10;
+    double b[size_b];                  
     int tmp;
-    int a;
-
-    f = fopen ("numbers.txt", "r");  // находим кол-во ненулевых элементов
-    for (int i = 0; i < N; i++) {
-        a = fscanf (f, "%lf", &B[i]);
-        if (a < 0) {
-            tmp = i;  // сохраняем номер первого "пустого" элемента в переменную tmp
-            break;
-        }
-    }
+    f = fopen("numbers.txt", "r");  // находим кол-во ненулевых элементов
+    tmp = search(b, f, size_b);
     fclose(f);
-
-    f = fopen ("numbers.txt", "r");  // Чтение чисел из файла в массив B
-        for (int i = 0; i < N; i++) {
-            if (i_tmp == tmp) {
-                fseek (f, 0, SEEK_SET); // Сдвигаем указатель в начало файла каждые tmp итераций
-                i_tmp = 0;              // Обнуляем счетчик
-            }
-            fscanf (f, "%lf", &B[i]);
-            i_tmp++;
-        }
+    f = fopen("numbers.txt", "r");  // Чтение чисел из файла в массив b
+    reading(b, tmp, f, size_b);
     fclose(f);
-
-    maximum (&B[0], &min, &max);
-    
-    f = fopen ("result.txt", "w");  // Запись результатов в текстовый файл
-        for (int i = 0; i < N; i++) {
-            fprintf (f, "%lf ", B[i]);
-        }
-        fprintf (f, "\n Maximum: %lf", max);
-        fprintf (f, "\n Minimum: %lf", min);
+    maximum(b, &min, &max, size_b);
+    f = fopen("result.txt", "w");  // Запись результатов в текстовый файл
+    writing(f, b, max, min, size_b);
     fclose(f);
 }
