@@ -1,20 +1,29 @@
 #include <stdio.h>
 
 void maximum(double* b, double* min, double* max, int size_b) {         // Функция для нахождения максимума и минимума
-    double m = 0.0;
-    double n = sizeof(double);
-    for (int i = 0; i < size_b; i++) {
-        if (b[i] > 0.0) {
-            if (b[i] > m) {
-                m = b[i];
-            }
-        }
-        else {
-            if (b[i] < n) {
-                n = b[i];
-            }
-        }
+    double m;
+    double n;
+    if (b[0]>b[1]) {
+        m = b[0];
+        n = b[1];
     }
+    else {
+        m = b[1];
+        n = b[0];
+    }
+    for(int i = 2; i < size_b; i++) {
+
+        if (b[i] > m) {
+            m = b[i];
+        }
+
+        else if (b[i] < n) {
+            n = b[i];
+        }
+
+    }
+    printf("%lf - max \n", m);
+    printf("%lf - min \n", n);
     *min = n;
     *max = m;
 }
